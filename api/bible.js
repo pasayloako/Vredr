@@ -119,4 +119,60 @@ module.exports = async (req, res) => {
             if (chapter < 1 || chapter > MAX_CHAPTERS[book]) {
                 return res.status(400).json({
                     success: false,
-                    error: `Chapter must be between 1 and ${MAX
+                    error: `Chapter must be between 1 and ${MAX_CHAPTERS[book]}`
+                });
+            }
+            
+            const apiBook = getApiBookName(book);
+            const maxVerses = 200;
+            const promises = [];
+            
+            for (let v = 1; v <= maxVerses; v++) {
+                const url = `${BIBLE_API_BASE}/books/${apiBook}/chapters/${chapter}/verses/${v}.json`;
+                promises.push(
+                    fetch(url).then(res => res.ok ? res.json() : null).catch(() => null)
+                );
+            }
+            
+            const results = await Promise.all(promises);
+            const verses = [];
+            
+            for (let i = 0; i < results.length; i++) {
+                const data = results[i];
+                if (data && data.text) {
+                    verses.push({
+                        number: parseInt(data.verse) || (i + 1),
+                        text: data.text.trim()
+                    });
+                } else {
+                    if (verses.length > 0 && i + 1 > verses.length + 5) break;
+                }
+            }
+            
+            if (verses.length === 0) {
+                throw new Error('No verses found');
+            }
+            
+            return res.json({
+                success: true,
+                book: book,
+                chapter: chapter,
+                verses: verses,
+                totalVerses: verses.length
+            });
+        }
+
+        // 404 for unknown endpoints
+        return res.status(404).json({
+            success: false,
+            error: 'Endpoint not found'
+        });
+        
+    } catch (error) {
+        console.error('API Error:', error);
+        return res.status(500).json({
+            success: false,
+            error: 'Internal server error'
+        });
+    }
+};
