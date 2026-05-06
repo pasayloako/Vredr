@@ -176,12 +176,17 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`✅ Bible Reader server running on http://localhost:${PORT}`);
-    console.log(`📖 API endpoints:`);
-    console.log(`   - GET /api/books - Get all books`);
-    console.log(`   - GET /api/bible/:book/:chapter - Get chapter verses`);
-    console.log(`   - GET /api/random - Get random chapter`);
-    console.log(`   - GET /api/health - Health check`);
-});
+// Only start server if not in Vercel environment
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`✅ Bible Reader server running on http://localhost:${PORT}`);
+        console.log(`📖 API endpoints:`);
+        console.log(`   - GET /api/books - Get all books`);
+        console.log(`   - GET /api/bible/:book/:chapter - Get chapter verses`);
+        console.log(`   - GET /api/random - Get random chapter`);
+        console.log(`   - GET /api/health - Health check`);
+    });
+}
+
+// Export for Vercel serverless function
+module.exports = app;
