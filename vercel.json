@@ -6,18 +6,14 @@
       "use": "@vercel/static"
     },
     {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
-    },
-      {
-      "src": "server.js",
+      "src": "api/bible.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "dest": "/api/bible.js"
     },
     {
       "src": "/(.*)",
